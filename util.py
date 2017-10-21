@@ -53,6 +53,8 @@ def read_q_label_data(data_path):
     labels = []
     for line in lines:
         splitted = line.split("\t")
+        if len(splitted) == 1:
+            continue
         q_.append(splitted[0])
         labels.append(splitted[1])
 
