@@ -1,13 +1,15 @@
 import numpy as np
 import os
+import random
 
 def mk_dict(data_paths):
     lines = []
     for data_path in data_paths:
         with open(data_path, "r") as fs:
-            lines += fs.readlines()
+            content = fs.read().lower().replace(".", "").replace("?","").replace("\t", " ")
+            lines += content.split("\n")
 
-    sentences = " ".join([line.split("\n")[0] for line in lines])
+    sentences = " ".join(lines)
     words = list(set(sentences.split(" ")))
     return words
 
@@ -55,13 +57,16 @@ def mk_train_function(batch_size, support_path, q_label_path, dict_path):
     #support path: support sentences data path
 
     dict_ = read_dict(dict_path)
-    support_data = read_support_data(support_path)
+    support_data = [convert_sentence2bow(s_, dict_) for s_ in read_support_data(support_path)]
     q_, label = read_q_label_data(q_label_path)
+    sets = np.array([[convert_sentence2bow(q_, dict_), convert_sentence2bow(label, dict_)] for q_, label in zip(q_, label)])
 
     def train_function():
-        dump = []
+        r_ = range(len(sets))
         while True:
-
-            yield
-
-    return train_function
+            choiced_idx = [random.choice(r_) for _ in range(batch_size)]
+            choiced = sets[choiced_idx]
+            choiced_q = choiced[:, 0]
+            choiced_label = choiced[:, 1]
+            yield choiced_q, choiced_label
+    return train_function, support_data
