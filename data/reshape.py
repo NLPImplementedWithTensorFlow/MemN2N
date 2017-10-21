@@ -14,7 +14,7 @@ def mk_q_and_labels(lines):
     for line in lines:
         line = " ".join(line.split(" ")[1:])
         if len(line.split("\t")) > 1:
-            q_labels.append(line)
+            q_labels.append("\t".join(line.split("\t")[:2])+"\n")
         else:
             support_sentences.append(line)
     return q_labels, support_sentences
