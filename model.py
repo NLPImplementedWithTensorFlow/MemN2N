@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import os
+from util import *
 
 class model():
     def __init__(self, args):
@@ -36,6 +37,8 @@ class model():
     def train(self):
         optimizer = tf.train.AdamOptimizer(self.args.lr).minimize(self.loss)
 
+        generate_data, support_sentences = mk_train_function(self.args.batch_size, self.args.support_path, self.args.q_label_path, self.args.dict_path)
+
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         config.log_device_placement = True
@@ -44,7 +47,11 @@ class model():
             summary_writer = tf.summary.FileWriter("saved", sess.graph)
             saver = tf.train.Saver(tf.global_variables())
 
-            for itr in range(100):
+            for itr, (q_, label) in enumerate(generate_data()):
+                loss_, _ = sess.run([self.loss, optimizer], feed_dict={self.support_s:support_sentences, self.q:q_, self.labels:label})
+
+                if itr % 50 == 0:
+                    print(itr, ":   ", loss_)
 
                 if itr % 200 == 0:
                     saver.save(sess, "saved/model.ckpt")

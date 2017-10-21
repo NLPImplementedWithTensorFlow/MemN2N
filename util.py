@@ -6,7 +6,14 @@ def mk_dict(data_paths):
     lines = []
     for data_path in data_paths:
         with open(data_path, "r") as fs:
-            content = fs.read().lower().replace(".", "").replace("?","").replace("\t", " ")
+            content = fs.read().lower()
+            if len(content.split("\t")) > 1:
+                ##q_label_
+                content = content.replace("?", "")
+                content = " ".join([" ".join(line.split("\t")[:2]) for line in content.split("\n")])
+            else:
+                content = content.replace(".", "")
+
             lines += content.split("\n")
 
     sentences = " ".join(lines)
